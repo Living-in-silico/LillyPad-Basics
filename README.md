@@ -1,2 +1,2 @@
 # LillyPad-Basics
-General Repo Message here
+Github Slack Integration

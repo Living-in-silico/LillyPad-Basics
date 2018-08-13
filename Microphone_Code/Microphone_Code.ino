@@ -1,28 +1,47 @@
+const int sensorPin = A0; 
+const int buttonPin = 7;
+int buttonState = 0;
+int sensorValue = 0;
+int TU = 63;
+int TD = 57;
+bool state=true;
 #include <SD.h>
 #include <SPI.h>
 
-int CS_PIN = 10;
+int CS_PIN = 4;
 
 File file;
 
-void setup()
-{
-
+void setup() {
   Serial.begin(9600);
-
+  pinMode(sensorPin, INPUT);
   initializeSD();
-  createFile("test.txt");
-  writeToFile("This is sample text!");
-  closeFile();
-
-  openFile("prefs.txt");
-  Serial.println(readLine());
-  Serial.println(readLine());
-  closeFile();
+  createFile("Values2.csv");
+  pinMode(buttonPin, INPUT);
 }
 
-void loop()
-{
+void loop() {
+  sensorValue = analogRead(sensorPin);
+//  Serial.println(sensorValue);
+  if (sensorValue > TU || sensorValue < TD){
+    if(sensorValue-60!=0){
+    Serial.println(sensorValue-60);
+    String value = String(sensorValue-60);
+    char copy[50];
+    value.toCharArray(copy,50);
+    writeToFile(copy);
+    }
+  }
+  else{
+    Serial.println(0);
+  }
+
+ buttonState = digitalRead(buttonPin);
+ if (buttonState == HIGH) {
+  closeFile();
+  Serial.write("Finished Storing Data");
+  exit(0);
+ }
 }
 
 void initializeSD()
@@ -39,7 +58,6 @@ void initializeSD()
     return;
   }
 }
-
 int createFile(char filename[])
 {
   file = SD.open(filename, FILE_WRITE);
@@ -77,37 +95,4 @@ void closeFile()
     file.close();
     Serial.println("File closed");
   }
-}
-
-int openFile(char filename[])
-{
-  file = SD.open(filename);
-  if (file)
-  {
-    Serial.println("File opened with success!");
-    return 1;
-  } else
-  {
-    Serial.println("Error opening file...");
-    return 0;
-  }
-}
-
-String readLine()
-{
-  String received = "";
-  char ch;
-  while (file.available())
-  {
-    ch = file.read();
-    if (ch == '\n')
-    {
-      return String(received);
-    }
-    else
-    {
-      received += ch;
-    }
-  }
-  return "";
 }
